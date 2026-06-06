@@ -1,32 +1,24 @@
-# Base image with JDK 21
-# Base image with JDK 21
-FROM eclipse-temurin:21-jdk
+FROM maven:3.9.15-eclipse-temurin-21
 
 
-# Install Maven 3 and required tools
-
-
-# Install Maven 3 and required tools
 RUN apt-get update && apt-get install -y \
-    maven \
     wget \
-    unzip \
-    curl \
     gnupg \
+    ca-certificates \
+    apt-transport-https \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
+    && apt-get update && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
+# Working directory set karna
 WORKDIR /app
 
-# Copy project files
-COPY . /app
 
-# Install Google Chrome & ChromeDriver
-RUN apt-get update && apt-get install -y google-chrome-stable \
-    && DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) \
-    && wget -q https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip \
-    && unzip chromedriver_linux64.zip -d /usr/local/bin \
-    && rm chromedriver_linux64.zip
+COPY . .
 
-# Run tests using Maven
+RUN mvn clean install -DskipTests
+
+
+
 CMD ["mvn", "test"]
