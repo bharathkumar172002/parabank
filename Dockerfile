@@ -1,5 +1,10 @@
 # Base image with JDK 21
-FROM openjdk:21-jdk-slim
+# Base image with JDK 21
+FROM eclipse-temurin:21-jdk
+
+
+# Install Maven 3 and required tools
+
 
 # Install Maven 3 and required tools
 RUN apt-get update && apt-get install -y \

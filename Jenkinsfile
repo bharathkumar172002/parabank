@@ -1,46 +1,66 @@
 pipeline {
     agent any
-
+ 
     tools {
-        maven 'Maven3'   // Jenkins में configure किया हुआ Maven 3
-        jdk 'JDK21'      // Jenkins में configure किया हुआ JDK 21
+        maven 'Maven3'
+        jdk 'jdk21'
     }
-
+ 
     stages {
+ 
         stage('Checkout') {
             steps {
                 git branch: 'master',
-                    url: 'https://github.com/bharathkumar172002/parabank.git'
+                    url: 'https://github.com/bharathkumar172002/Tutorial_Ninza.git'
             }
         }
-
+ 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean'
             }
         }
-
+ 
+        stage('Compile') {
+            steps {
+                bat 'mvn compile'
+            }
+        }
+ 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
-
-        stage('Publish Reports') {
+ 
+        stage('Package') {
             steps {
-                junit 'target/surefire-reports/*.xml'
-                publishHTML(target: [
-                    reportDir: 'target/surefire-reports',
-                    reportFiles: 'index.html',
-                    reportName: 'TestNG Report'
-                ])
+                bat 'mvn package'
+            }
+        }
+ 
+        stage('Docker Build') {
+            steps {
+             
+                bat 'docker build -t cucumber-framework .'
+            }
+        }
+ 
+        stage('Docker Run') {
+            steps {
+              
+                bat 'docker run --rm cucumber-framework'
             }
         }
     }
-
+ 
     post {
-        always {
-            archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+        success {
+            echo 'Build Successful'
+        }
+ 
+        failure {
+            echo 'Build Failed'
         }
     }
 }
